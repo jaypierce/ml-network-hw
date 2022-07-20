@@ -61,8 +61,7 @@ while True:
 
 incoming_arr = pickle.loads(incoming)
 print(incoming_arr)
-with open('out2.stl', 'wb') as f:
-    pickle.dump(incoming_arr, f)
+incoming_arr.save('out2.stl')
 
 
 # with open('out2.stl', "wb") as f:
