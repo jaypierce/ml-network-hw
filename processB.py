@@ -55,6 +55,7 @@ print('[+] Connected')
 s.send(f'{filename}{SEPARATOR}{filesize}'.encode())
 # print(type(filename))
 my_mesh = stl.mesh.Mesh.from_file('out.stl')
+
 # print(my_mesh)
 data_string = pickle.dumps(my_mesh)
 s.send(data_string)

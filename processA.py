@@ -1,6 +1,6 @@
 import zmq
 from time import sleep
-# from stl import mesh
+import pickle
 import stl
 import socket
 import tqdm
@@ -30,16 +30,6 @@ while not arrived:
 print("Recieved confimation!")
 sender.close()
 
-#Recieving
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.bind((socket.gethostname(), 5556))
-# s.listen(5)
-
-# while True:
-#     clientsocket, address = s.accept()
-#     print(f'Connection from {address} is established')
-#     clientsocket.send(bytes('Requesting stl file...', 'utf-8'))
-
 #Better Recieving
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 5556
@@ -60,18 +50,30 @@ filename = os.path.basename(filename)
 print(filesize)
 # filesize = int(filesize)
 
-recieved = client_socket.recv(BUFFER_SIZE)
+# recieved = client_socket.recv(10000)
 # print(sys.getsizeof(recieved))
 
-# progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-with open('out2.stl', "wb") as f:
-    i = 0
-    while i <= int(filesize):
-        bytes_read = client_socket.recv(BUFFER_SIZE)
-        if not bytes_read:    
-            break
-        f.write(bytes_read)
-        i += BUFFER_SIZE
+incoming = b""
+while True:
+    packet = client_socket.recv(4096)
+    if not packet: break
+    incoming += packet
+
+incoming_arr = pickle.loads(incoming)
+print(incoming_arr)
+with open('out2.stl', 'wb') as f:
+    pickle.dump(incoming_arr, f)
+
+
+# with open('out2.stl', "wb") as f:
+#     i = 0
+#     while i <= int(filesize):
+#         bytes_read = client_socket.recv(BUFFER_SIZE)
+#         if not bytes_read:    
+#             break
+#         f.write(bytes_read)
+#         i += BUFFER_SIZE
+    
 client_socket.close()
 s.close()
 
