@@ -43,7 +43,7 @@ sender.close()
 #Better Recieving
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 5556
-BUFFER_SIZE = stl.stl.BUFFER_SIZE
+BUFFER_SIZE = 1024
 SEPARATOR = "<SEPARATOR>"
 
 #Creating socket
@@ -65,23 +65,13 @@ recieved = client_socket.recv(BUFFER_SIZE)
 
 # progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
 with open('out2.stl', "wb") as f:
-    while True:
+    i = 0
+    while i <= int(filesize):
         bytes_read = client_socket.recv(BUFFER_SIZE)
         if not bytes_read:    
             break
         f.write(bytes_read)
+        i += BUFFER_SIZE
 client_socket.close()
 s.close()
 
-from mpl_toolkits import mplot3d
-from matplotlib import pyplot
-
-figure = pyplot.figure()
-axes = mplot3d.Axes3D(figure)
-
-my_mesh = stl.mesh.Mesh.from_file('out2.stl')
-axes.add_collection3d(mplot3d.art3d.Poly3DCollection(my_mesh.vextors))
-
-scale = my_mesh.points.flatten()
-axes.auto_scale_xyz(scale, scale, scale)
-pyplot.show()
