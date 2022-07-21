@@ -1,4 +1,9 @@
-from importlib.resources import open_binary
+######################################
+#Networking with .stl files
+#Developer: Jaylan Pierce
+#Date: July 20, 2022
+######################################
+
 from time import sleep
 import zmq
 import socket
@@ -11,39 +16,30 @@ context = zmq.Context()
 reciever = context.socket(zmq.REP)
 reciever.bind('tcp://127.0.0.1:5555')
 
-#Recieves stl file and sends it back to process A
+#Recieves stl file and tells process that it was recieved
 incoming_file = None
 while not incoming_file:
     incoming_file = reciever.recv_pyobj()
-
     sleep(1)
-
     reciever.send_pyobj(incoming_file)
 
-
 print("File Recieved")
-incoming_file.save('out.stl')
+incoming_file.save('output_of_B.stl')
 reciever.close()
 
-#TODO: Parse File
+#Parse File
+import subprocess
+subprocess.run(["python3", "parse.py", "output_of_B.stl", ">>", "output.csv"])
 
-#Sending the file back
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect((socket.gethostname(), 5556))
-
-# while True:
-#     msg = s.recv(1024)
-#     print(msg.decode("utf-8"))
-
-
-#Better Sending
+#Using python socket library to send stl file back
+#to processA
 BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
 
 host = 'localhost'
 port = 5556
 
-filename = 'out.stl'
+filename = 'output_of_B.stl'
 filesize = os.path.getsize(filename)
 print(filesize)
 
@@ -53,13 +49,11 @@ print(f"[+] Connecting to {host}:{port}")
 s.connect((host,port))
 print('[+] Connected')
 s.send(f'{filename}{SEPARATOR}{filesize}'.encode())
-# print(type(filename))
-my_mesh = stl.mesh.Mesh.from_file('out.stl')
 
-# print(my_mesh)
+#sending the file
+my_mesh = stl.mesh.Mesh.from_file('output_of_B.stl')
 data_string = pickle.dumps(my_mesh)
 s.send(data_string)
 
-#sending the file
 s.close()
 print("File sent")

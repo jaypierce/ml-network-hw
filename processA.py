@@ -1,17 +1,18 @@
+######################################
+#Networking with .stl files
+#Developer: Jaylan Pierce
+#Date: July 20, 2022
+######################################
+
 import zmq
-from time import sleep
 import pickle
 import stl
 import socket
-import tqdm
 import os
-import sys
 
 #Sending
 #Setting up ZeroMQ publisher
 context = zmq.Context()
-# sender = context.socket(zmq.PUB)
-# sender.bind('tcp://127.0.0.1:5555')
 
 file = stl.mesh.Mesh.from_file('cad_mesh.stl')
 print("Sending stl file...")
@@ -33,7 +34,7 @@ sender.close()
 #Better Recieving
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 5556
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
 
 #Creating socket
@@ -47,11 +48,6 @@ print(f"[+] {address} is connected.")
 received = client_socket.recv(BUFFER_SIZE).decode()
 filename, filesize = received.split(SEPARATOR)
 filename = os.path.basename(filename)
-print(filesize)
-# filesize = int(filesize)
-
-# recieved = client_socket.recv(10000)
-# print(sys.getsizeof(recieved))
 
 incoming = b""
 while True:
@@ -61,17 +57,8 @@ while True:
 
 incoming_arr = pickle.loads(incoming)
 print(incoming_arr)
-incoming_arr.save('out2.stl')
+incoming_arr.save('output_of_A.stl')
 
-
-# with open('out2.stl', "wb") as f:
-#     i = 0
-#     while i <= int(filesize):
-#         bytes_read = client_socket.recv(BUFFER_SIZE)
-#         if not bytes_read:    
-#             break
-#         f.write(bytes_read)
-#         i += BUFFER_SIZE
     
 client_socket.close()
 s.close()
